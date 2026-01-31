@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Job } from "@/types/job";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Calendar } from "lucide-react";
@@ -20,7 +21,7 @@ function timeAgo(dateString: string) {
   return Math.floor(seconds) + " seconds ago";
 }
 
-export function JobCard({ job }: { job: Job }) {
+export const JobCard = memo(function JobCard({ job }: { job: Job }) {
   return (
     <div className="flex flex-col p-6 rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
@@ -40,7 +41,7 @@ export function JobCard({ job }: { job: Job }) {
           href={job.url} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="shrink-0 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 gap-2"
+          className="shrink-0 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 gap-2 cursor-pointer"
         >
           View on GitHub <ExternalLink className="w-4 h-4" />
         </a>
@@ -60,4 +61,4 @@ export function JobCard({ job }: { job: Job }) {
       </div>
     </div>
   );
-}
+});
