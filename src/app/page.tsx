@@ -30,7 +30,7 @@ export default function Home() {
             Browse Jobs
           </Link>
           <a 
-            href="https://github.com" 
+            href="https://github.com/FranciscoOssian/GitHub-Jobs-Aggregator" 
             target="_blank" 
             rel="noopener noreferrer"
              className="inline-flex items-center justify-center h-11 rounded-md px-8 font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
