@@ -71,7 +71,12 @@ Not allowed:
 ## 7. Filtering
 - Filtering is entirely client-side (UI-driven)
 - Filters operate directly on existing labels
+- **Layout**: 
+  - **Desktop**: Persistent Sticky Sidebar for filters to allow simultaneous filtering and browsing.
+  - **Mobile**: Collapsible or stacked filters at the top.
 - **Repository Filtering**: Users can select/deselect specific repositories (default: all selected).
+  - **Display**: Shown as the community/owner name only (e.g., "backend-br" instead of "backend-br/vagas").
+  - **Sorting**: Repositories are sorted by name length (ascending) to optimize the visual flow of the filter buttons.
 - **Label Logic**: Multiple selected labels use **OR** logic (Union), not AND. This allows selecting labels from different repositories simultaneously.
 - **Dynamic Label Availability**: The list of available filter labels must be derived **only** from the currently visible jobs.
 - **Label Context**: Labels must be visually associated with their repository (e.g., grouped by repository in the filter UI).

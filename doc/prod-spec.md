@@ -103,6 +103,7 @@ Meaning is never inferred or unified.
 - Clean and minimal UI
 - Fast scanning
 - Technical aesthetic
+- **Accessibility**: First-class citizen. Must aim for WCAG AA compliance (Contrast, Semantic HTML, Keyboard Navigation).
 - No content duplication
 - Encourage redirection to GitHub
 
