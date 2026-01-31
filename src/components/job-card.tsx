@@ -1,7 +1,3 @@
-// Removed unused imports
-// Removed unused import
-// Native timeAgo implementation used below
-
 import { Job } from "@/types/job";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Calendar } from "lucide-react";
@@ -58,7 +54,7 @@ export function JobCard({ job }: { job: Job }) {
         ))}
       </div>
 
-      <div className="mt-4 pt-4 border-t flex items-center text-xs text-muted-foreground">
+      <div className="mt-4 pt-4 border-t flex items-center text-xs text-muted-foreground" suppressHydrationWarning>
         <Calendar className="w-3.5 h-3.5 mr-1" />
         Posted {timeAgo(job.createdAt)}
       </div>

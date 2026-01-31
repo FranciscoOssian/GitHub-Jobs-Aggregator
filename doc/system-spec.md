@@ -15,7 +15,7 @@ It:
 - Styling: **Tailwind CSS**
 - Data source: **GitHub GraphQL API**
 - Authentication: Personal GitHub token (read-only)
-- Rendering: Static + ISR (Incremental Static Regeneration)
+- Rendering: Static + ISR (Jobs data) / Server-Side Rendering (Filtering)
 
 ---
 
@@ -69,7 +69,7 @@ Not allowed:
 ---
 
 ## 7. Filtering
-- Filtering is entirely client-side (UI-driven)
+- Filtering is **Server-Side** (controlled via URL query parameters)
 - Filters operate directly on existing labels
 - **Layout**: 
   - **Desktop**: Persistent Sticky Sidebar for filters to allow simultaneous filtering and browsing.
@@ -84,13 +84,10 @@ Not allowed:
 - No derived or synthetic filters
 
 ### Persistence Strategy
-Filters (text, labels, repositories) must be persisted with the following priority:
-1. **URL Query Parameters**: Primary source of truth (stateless, shareable).
-2. **Local Storage**: Secondary source (user preference persistence).
-3. **Defaults**: Fallback if neither exists (empty search, no labels, all repos).
+Filters (text, labels, repositories) are persisted **exclusively** via:
+1. **URL Query Parameters**: The single source of truth (stateless, shareable).
 
-Sync Logic: Changes update both URL and Local Storage.
-
+Sync Logic: UI interactions trigger URL updates; Server renders based on URL.
 
 ---
 

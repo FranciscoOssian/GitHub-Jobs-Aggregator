@@ -1,9 +1,8 @@
-import { Suspense } from "react";
 import { fetchJobs } from "@/lib/github";
 import { JobList } from "./job-list";
 import LinkNext from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { JobCardSkeleton } from "@/components/job-card-skeleton";
+
 import type { Metadata } from "next";
 
 export const revalidate = 86400; // 24 hours
@@ -13,9 +12,50 @@ export const metadata: Metadata = {
   description: "Find job opportunities aggregated from open source repositories. Filter by label, company, and more.",
 };
 
-export default async function JobsPage() {
-  // Fetch data on the server
-  const jobs = await fetchJobs();
+// Helper to normalize strings for comparison
+const normalize = (s: string) => s.toLowerCase().trim();
+
+interface PageProps {
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
+export default async function JobsPage({ searchParams }: PageProps) {
+  // 1. Fetch all data on the server
+  const allJobs = await fetchJobs();
+
+  // 2. Parse Search Params
+  const params = await searchParams;
+  const search = typeof params?.search === 'string' ? params.search : "";
+  const labelsParam = typeof params?.labels === 'string' ? params.labels : "";
+  const hiddenReposParam = typeof params?.hiddenRepos === 'string' ? params.hiddenRepos : "";
+
+  const selectedLabels = labelsParam ? labelsParam.split(",") : [];
+  const hiddenRepos = hiddenReposParam ? hiddenReposParam.split(",") : [];
+
+  // 3. Filter Jobs on Server
+  const filteredJobs = allJobs.filter(job => {
+    // Repo Visibility Filter
+    if (hiddenRepos.includes(job.repository)) return false;
+
+    // Default to true
+    let matchesSearch = true;
+    let matchesLabels = true;
+
+    // Search Filter
+    if (search) {
+      const q = normalize(search);
+      matchesSearch = normalize(job.title).includes(q) || 
+                      normalize(job.repository).includes(q) ||
+                      normalize(job.company).includes(q);
+    }
+
+    // Label Filter (OR logic)
+    if (selectedLabels.length > 0) {
+      matchesLabels = job.labels.some(l => selectedLabels.includes(l.name));
+    }
+
+    return matchesSearch && matchesLabels;
+  });
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -27,28 +67,16 @@ export default async function JobsPage() {
       </header>
       
       <main className="flex-1 container mx-auto p-4 sm:p-6 lg:p-8">
-        <Suspense fallback={<JobsLoadingSkeleton />}>
-          <JobList jobs={jobs} />
-        </Suspense>
+          <JobList 
+            jobs={filteredJobs} 
+            allJobs={allJobs}
+            initialFilters={{
+              search,
+              labels: selectedLabels,
+              hiddenRepos
+            }}
+          />
       </main>
-    </div>
-  );
-}
-
-function JobsLoadingSkeleton() {
-  return (
-    <div className="flex flex-col lg:flex-row gap-8">
-       {/* Sidebar Skeleton */}
-       <div className="hidden lg:block w-80 shrink-0 space-y-6">
-          <div className="h-64 bg-card border rounded-xl animate-pulse" />
-       </div>
-       
-       {/* List Skeleton */}
-       <div className="flex-1 space-y-4">
-          {[1, 2, 3, 4].map((i) => (
-            <JobCardSkeleton key={i} />
-          ))}
-       </div>
     </div>
   );
 }

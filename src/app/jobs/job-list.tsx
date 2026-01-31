@@ -1,31 +1,47 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Job } from "@/types/job";
 import { JobCard } from "@/components/job-card";
 import { Search, Filter, X, Menu } from "lucide-react"; 
 import { REPOSITORIES } from "@/config/repos";
-import { useJobFilters } from "@/hooks/use-job-filters";
 import { Badge } from "@/components/ui/badge";
 
-interface JobListProps {
-  jobs: Job[];
+interface FilterState {
+  search: string;
+  labels: string[];
+  hiddenRepos: string[];
 }
 
-export function JobList({ jobs }: JobListProps) {
-  const { filters, setFilters, isInitialized } = useJobFilters([]);
+interface JobListProps {
+  jobs: Job[]; // This is the filtered list from the server
+  allJobs: Job[]; // This is the full list for calculating facets
+  initialFilters: FilterState;
+}
+
+export function JobList({ jobs, allJobs, initialFilters }: JobListProps) {
+  const router = useRouter();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  // ... (rest of logic unchanged until Badge)
+  const filters = initialFilters; // Use props as source of truth
 
+  const updateFilters = (newFilters: Partial<FilterState>) => {
+    const next = { ...filters, ...newFilters };
+    const params = new URLSearchParams();
+    
+    if (next.search) params.set("search", next.search);
+    if (next.labels.length > 0) params.set("labels", next.labels.join(","));
+    if (next.hiddenRepos.length > 0) params.set("hiddenRepos", next.hiddenRepos.join(","));
 
-  const { labelsByRepo, filteredJobs } = useMemo(() => {
-    if (!isInitialized) {
-      return { labelsByRepo: new Map<string, Map<string, number>>(), filteredJobs: [] };
-    }
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+  const labelsByRepo = useMemo(() => {
 
-    const visibleJobs = jobs.filter(job => !filters.hiddenRepos.includes(job.repository));
+    
+    const visibleReposJobs = allJobs.filter(job => !filters.hiddenRepos.includes(job.repository));
     const repoLabelMap = new Map<string, Map<string, number>>();
     
+    // Initialize map structure
     REPOSITORIES.forEach(repo => {
       const fullName = `${repo.owner}/${repo.name}`;
       if (!filters.hiddenRepos.includes(fullName)) {
@@ -33,7 +49,8 @@ export function JobList({ jobs }: JobListProps) {
       }
     });
 
-    visibleJobs.forEach(job => {
+    // Populate counts
+    visibleReposJobs.forEach(job => {
       const repoMap = repoLabelMap.get(job.repository);
       if (repoMap) {
         job.labels.forEach((l) => {
@@ -42,29 +59,17 @@ export function JobList({ jobs }: JobListProps) {
         });
       }
     });
+    
+    return repoLabelMap;
+  }, [allJobs, filters.hiddenRepos]);
 
-    const result = visibleJobs.filter(job => {
-      const matchesSearch = job.title.toLowerCase().includes(filters.search.toLowerCase()) || 
-                            job.repository.toLowerCase().includes(filters.search.toLowerCase());
-      
-      const matchesLabels = filters.labels.length === 0 || 
-                            filters.labels.some(label => job.labels.some(l => l.name === label));
-
-      return matchesSearch && matchesLabels;
-    });
-
-    return { 
-      labelsByRepo: repoLabelMap,
-      filteredJobs: result 
-    };
-  }, [jobs, filters, isInitialized]);
 
   const toggleLabel = (label: string) => {
     const current = filters.labels;
     const next = current.includes(label) 
       ? current.filter(l => l !== label)
       : [...current, label];
-    setFilters({ labels: next });
+    updateFilters({ labels: next });
   };
 
   const toggleRepo = (repoName: string) => {
@@ -72,10 +77,10 @@ export function JobList({ jobs }: JobListProps) {
     const next = current.includes(repoName)
       ? current.filter(r => r !== repoName)
       : [...current, repoName];
-    setFilters({ hiddenRepos: next });
+    updateFilters({ hiddenRepos: next });
   };
-
-  if (!isInitialized) return null;
+  
+  const clearAll = () => updateFilters({ search: "", labels: [], hiddenRepos: [] });
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 relative items-start">
@@ -106,7 +111,7 @@ export function JobList({ jobs }: JobListProps) {
               </h2>
               {(filters.search || filters.labels.length > 0 || filters.hiddenRepos.length > 0) && (
                 <button
-                  onClick={() => setFilters({ search: "", labels: [], hiddenRepos: [] })}
+                  onClick={clearAll}
                   className="text-xs text-destructive hover:underline font-medium"
                 >
                   Clear All
@@ -125,7 +130,7 @@ export function JobList({ jobs }: JobListProps) {
                   placeholder="Title, company..."
                   className="w-full h-9 rounded-md border border-input bg-background pl-9 pr-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   value={filters.search}
-                  onChange={(e) => setFilters({ search: e.target.value })}
+                  onChange={(e) => updateFilters({ search: e.target.value })}
                   aria-label="Search jobs by title or company"
                 />
              </div>
@@ -166,7 +171,7 @@ export function JobList({ jobs }: JobListProps) {
                 <span className="text-sm font-medium text-muted-foreground">Labels (Match Any)</span>
                 {filters.labels.length > 0 && (
                    <button 
-                     onClick={() => setFilters({ labels: [] })}
+                     onClick={() => updateFilters({ labels: [] })}
                      className="text-xs text-blue-500 hover:underline"
                    >
                      Clear
@@ -220,13 +225,13 @@ export function JobList({ jobs }: JobListProps) {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold tracking-tight">Job Listings</h1>
           <Badge className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-3 py-1 text-sm">
-             {filteredJobs.length} Found
+             {jobs.length} Found
           </Badge>
         </div>
 
         <div className="space-y-4">
-          {filteredJobs.length > 0 ? (
-            filteredJobs.map(job => (
+          {jobs.length > 0 ? (
+            jobs.map(job => (
               <JobCard key={job.id} job={job} />
             ))
           ) : (
@@ -237,7 +242,7 @@ export function JobList({ jobs }: JobListProps) {
                   Adjust your filters or search terms to see more results.
                 </p>
                 <button
-                    onClick={() => setFilters({ search: "", labels: [], hiddenRepos: [] })}
+                    onClick={clearAll}
                     className="mt-6 text-sm font-medium text-primary hover:underline"
                 >
                     Clear all filters
