@@ -180,7 +180,7 @@ export function JobList({ jobs }: JobListProps) {
                     return (
                       <div key={repoName}>
                         <h4 className="text-[10px] font-bold uppercase text-muted-foreground mb-2 sticky top-0 bg-card py-1">
-                          {repoName.split('/')[1]}
+                          {repoName.split('/')[0]}
                         </h4>
                         <div className="flex flex-wrap gap-1.5">
                           {Array.from(labels.entries()).sort().map(([label, count]) => {
