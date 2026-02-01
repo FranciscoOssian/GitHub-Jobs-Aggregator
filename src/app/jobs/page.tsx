@@ -5,8 +5,6 @@ import { ArrowLeft } from "lucide-react";
 
 import type { Metadata } from "next";
 
-export const revalidate = 86400; // 24 hours
-
 export const metadata: Metadata = {
   title: "Browse GitHub Jobs - Aggregated Issues",
   description: "Find job opportunities aggregated from open source repositories. Filter by label, company, and more.",

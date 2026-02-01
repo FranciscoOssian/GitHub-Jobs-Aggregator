@@ -1,22 +1,10 @@
-import { GraphQLClient, gql } from 'graphql-request';
-import { REPOSITORIES } from '@/config/repos';
+import { REPOSITORIES, Repository } from '@/config/repos';
 import { Job, GitHubIssue } from '@/types/job';
 
 const GITHUB_ENDPOINT = 'https://api.github.com/graphql';
-
-// Ensure GITHUB_TOKEN is available
 const token = process.env.GITHUB_TOKEN;
-if (!token) {
-  console.warn('GITHUB_TOKEN is not defined in environment variables. Data fetching will fail.');
-}
 
-const client = new GraphQLClient(GITHUB_ENDPOINT, {
-  headers: {
-    authorization: `Bearer ${token}`,
-  },
-});
-
-const query = gql`
+const query = `
   query GetIssues($owner: String!, $name: String!, $labels: [String!]) {
     repository(owner: $owner, name: $name) {
       issues(first: 20, states: OPEN, labels: $labels, orderBy: {field: CREATED_AT, direction: DESC}) {
@@ -44,43 +32,82 @@ const query = gql`
 `;
 
 interface GitHubResponse {
-  repository?: {
-    issues: {
-      nodes: GitHubIssue[];
+  data?: {
+    repository?: {
+      issues: {
+        nodes: GitHubIssue[];
+      };
     };
   };
+  errors?: unknown[];
+}
+
+/**
+ * Helper to make a GraphQL request using fetch
+ */
+async function requestGraphQL(variables: Record<string, unknown>) {
+  if (!token) {
+    console.warn('GITHUB_TOKEN is not defined.');
+    return null;
+  }
+
+  const response = await fetch(GITHUB_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ query, variables }),
+    next: { 
+      revalidate: 86400, // 24 hours
+      tags: ['jobs']
+    },
+  });
+
+  const json = (await response.json()) as GitHubResponse;
+  
+  if (json.errors) {
+    console.error('GraphQL Errors:', json.errors);
+    return null;
+  }
+
+  return json.data;
+}
+
+/**
+ * Fetches jobs from a single repository
+ */
+async function fetchJobsFromRepo(repo: Repository): Promise<Job[]> {
+  try {
+    const data = await requestGraphQL({
+      owner: repo.owner,
+      name: repo.name,
+      labels: repo.label ? [repo.label] : undefined,
+    });
+
+    const issues = data?.repository?.issues?.nodes || [];
+
+    return issues.map((issue: GitHubIssue) => ({
+      id: issue.id,
+      title: issue.title,
+      company: issue.repository.owner.login,
+      repository: `${issue.repository.owner.login}/${issue.repository.name}`,
+      url: issue.url,
+      labels: issue.labels.nodes.map((l) => ({ name: l.name, color: l.color })),
+      createdAt: issue.createdAt,
+    }));
+  } catch (error) {
+    console.error(`Failed to fetch jobs from ${repo.owner}/${repo.name}:`, error);
+    return [];
+  }
 }
 
 export async function fetchJobs(): Promise<Job[]> {
-  const allJobs: Job[] = [];
-
-  for (const repo of REPOSITORIES) {
-    try {
-      const variables = {
-        owner: repo.owner,
-        name: repo.name,
-        labels: repo.label ? [repo.label] : undefined,
-      };
-
-      const data = await client.request<GitHubResponse>(query, variables);
-      const issues = data.repository?.issues?.nodes || [];
-
-      const jobs = issues.map((issue: GitHubIssue) => ({
-        id: issue.id,
-        title: issue.title,
-        company: issue.repository.owner.login,
-        repository: `${issue.repository.owner.login}/${issue.repository.name}`,
-        url: issue.url,
-        labels: issue.labels.nodes.map((l) => ({ name: l.name, color: l.color })),
-        createdAt: issue.createdAt,
-      }));
-
-      allJobs.push(...jobs);
-    } catch (error: any) {
-      console.error(`Failed to fetch jobs from ${repo.owner}/${repo.name}:`, JSON.stringify(error, null, 2));
-      // Continue to next repo even if one fails
-    }
-  }
+  // Parallelize the requests for all repositories
+  const repoPromises = REPOSITORIES.map(repo => fetchJobsFromRepo(repo));
+  const results = await Promise.all(repoPromises);
+  
+  const allJobs = results.flat();
 
   // Sort all jobs by date descending
   return allJobs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
