@@ -39,7 +39,7 @@ export const JobCard = memo(function JobCard({ job }: { job: Job }) {
             </a>
             {job.duplicateInfo && (
               <div className="relative group inline-block ml-2 align-middle">
-                <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800 cursor-help transition-all hover:scale-105">
+                <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900 dark:bg-amber-900/40 dark:text-amber-200 border border-amber-300 dark:border-amber-700 cursor-help transition-all hover:scale-105">
                   {(job.duplicateInfo.score * 100).toFixed(0)}% Dup
                 </span>
                 
@@ -67,11 +67,12 @@ export const JobCard = memo(function JobCard({ job }: { job: Job }) {
           href={job.url} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="w-full sm:w-auto sm:self-start inline-flex items-center justify-center rounded-md text-xs sm:text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-3 sm:px-4 py-2 gap-2 cursor-pointer whitespace-nowrap"
+          className="w-full sm:w-auto sm:self-start inline-flex items-center justify-center rounded-md text-xs sm:text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-3 sm:px-4 py-2 gap-2 cursor-pointer whitespace-nowrap min-h-[44px]"
+          aria-label={`View job: ${job.title} on GitHub`}
         >
           <span className="hidden xs:inline">View on GitHub</span>
           <span className="xs:hidden">View Job</span>
-          <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+          <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" aria-hidden="true" />
         </a>
       </div>
       

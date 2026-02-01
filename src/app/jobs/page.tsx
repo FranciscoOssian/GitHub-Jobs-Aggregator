@@ -63,7 +63,7 @@ export default async function JobsPage({ searchParams }: PageProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="px-3 sm:px-6 py-3 sm:py-4 border-b flex items-center gap-3 sm:gap-4 bg-background/80 backdrop-blur-md z-50 sticky top-0">
-        <LinkNext href="/" className="text-muted-foreground hover:text-foreground transition-colors">
+        <LinkNext href="/" className="text-muted-foreground hover:text-foreground transition-colors p-2 -ml-2 rounded-md" aria-label="Go back to home page">
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
         </LinkNext>
         <h1 className="text-lg sm:text-xl font-bold">Latest Jobs</h1>

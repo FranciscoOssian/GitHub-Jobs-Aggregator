@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground selection:bg-primary/20">
       <header className="px-6 py-4 border-b flex items-center justify-between sticky top-0 bg-background/80 backdrop-blur-sm z-50">
-        <h1 className="text-xl font-bold tracking-tight">GitHub Jobs Aggregator</h1>
+        <span className="text-xl font-bold tracking-tight">GitHub Jobs Aggregator</span>
         <nav>
            <Link href="/jobs" className="text-sm font-medium hover:text-primary transition-colors">
               Browse Jobs
@@ -53,19 +53,19 @@ export default function Home() {
         <section className="w-full px-6 py-16 bg-muted/30 border-y">
           <div className="max-w-6xl mx-auto grid gap-12 md:grid-cols-3">
             <div className="space-y-4">
-              <h3 className="text-xl font-bold">Centralized Discovery</h3>
+              <h2 className="text-xl font-bold">Centralized Discovery</h2>
               <p className="text-muted-foreground">
                 Stop checking dozens of individual repositories. We index job postings from the most active developer communities into a single, searchable list.
               </p>
             </div>
             <div className="space-y-4">
-              <h3 className="text-xl font-bold">Direct Integration</h3>
+              <h2 className="text-xl font-bold">Direct Integration</h2>
               <p className="text-muted-foreground">
                 We respect the source. Every listing links directly to the original GitHub Issue, preserving context and ensuring data ownership.
               </p>
             </div>
             <div className="space-y-4">
-              <h3 className="text-xl font-bold">Smart Filtering</h3>
+              <h2 className="text-xl font-bold">Smart Filtering</h2>
               <p className="text-muted-foreground">
                 Filter by specific repositories or labels. Find exactly what you&apos;re looking for without the noise of traditional job boards.
               </p>

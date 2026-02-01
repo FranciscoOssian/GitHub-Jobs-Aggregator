@@ -156,15 +156,15 @@ export function JobList({ jobs, allJobs, initialFilters }: JobListProps) {
             id="show-duplicates"
             type="button"
             onClick={() => updateFilters({ showDuplicates: !filters.showDuplicates })}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background min-h-[44px] min-w-[44px] ${
               filters.showDuplicates ? "bg-primary" : "bg-input"
             }`}
             role="switch"
             aria-checked={filters.showDuplicates}
           >
             <span
-              className={`pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform ${
-                filters.showDuplicates ? "translate-x-4" : "translate-x-0.5"
+              className={`pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform ${
+                filters.showDuplicates ? "translate-x-5" : "translate-x-0.5"
               }`}
             />
           </button>
@@ -183,7 +183,7 @@ export function JobList({ jobs, allJobs, initialFilters }: JobListProps) {
                 <button
                   key={fullName}
                   onClick={() => toggleRepo(fullName)}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors border cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors border cursor-pointer min-h-[36px] ${
                     !isHidden 
                     ? "bg-secondary text-secondary-foreground border-transparent hover:bg-secondary/80" 
                     : "bg-transparent text-muted-foreground border-input opacity-60 hover:text-foreground"
@@ -191,7 +191,7 @@ export function JobList({ jobs, allJobs, initialFilters }: JobListProps) {
                   aria-pressed={!isHidden}
                   aria-label={`Toggle visibility for repository ${repo.owner}`}
                 >
-                  <span className={`w-1.5 h-1.5 rounded-full ${!isHidden ? "bg-green-500" : "bg-zinc-300"}`} />
+                  <span className={`w-2 h-2 rounded-full ${!isHidden ? "bg-green-500" : "bg-zinc-300"}`} />
                   {repo.owner}
                 </button>
               );
@@ -218,10 +218,10 @@ export function JobList({ jobs, allJobs, initialFilters }: JobListProps) {
                 if (labels.size === 0) return null;
                 return (
                   <div key={repoName}>
-                    <h4 className="text-[10px] font-bold uppercase text-muted-foreground mb-2 sticky top-0 bg-card py-1">
+                    <span className="text-[10px] font-bold uppercase text-muted-foreground mb-2 sticky top-0 bg-card py-1 block">
                       {repoName.split('/')[0]}
-                    </h4>
-                    <div className="flex flex-wrap gap-1.5">
+                    </span>
+                    <div className="flex flex-wrap gap-2">
                       {Array.from(labels.entries()).sort().map(([label, count]) => {
                          const isSelected = filters.labels.includes(label);
                          return (
@@ -229,13 +229,14 @@ export function JobList({ jobs, allJobs, initialFilters }: JobListProps) {
                              key={`${repoName}-${label}`}
                              onClick={() => toggleLabel(label)}
                              className={`
-                               inline-flex items-center gap-1.5 rounded px-2 py-1 text-[11px] font-medium transition-colors border cursor-pointer
+                               inline-flex items-center gap-1.5 rounded px-3 py-2 text-[11px] font-medium transition-colors border cursor-pointer min-h-[32px]
                                ${isSelected 
                                  ? "border-blue-500/50 bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300" 
                                  : "border-transparent bg-secondary/40 text-secondary-foreground hover:bg-secondary/60"
                                }
                              `}
                              title={`${label} (${count} jobs)`}
+                             aria-pressed={isSelected}
                            >
                              {label}
                              <span className="opacity-50 text-[10px]">{count}</span>
