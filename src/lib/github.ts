@@ -59,7 +59,6 @@ async function requestGraphQL(variables: Record<string, unknown>) {
     },
     body: JSON.stringify({ query, variables }),
     next: { 
-      revalidate: 86400, // 24 hours
       tags: ['jobs']
     },
   });

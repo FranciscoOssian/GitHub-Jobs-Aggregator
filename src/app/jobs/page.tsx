@@ -1,4 +1,4 @@
-import { fetchJobs } from "@/lib/github";
+import { getJobs } from "@/lib/jobs-service";
 import { JobList } from "./job-list";
 import LinkNext from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -18,21 +18,26 @@ interface PageProps {
 }
 
 export default async function JobsPage({ searchParams }: PageProps) {
-  // 1. Fetch all data on the server
-  const allJobs = await fetchJobs();
+  // 1. Fetch all data on the server with similarity check
+  const allJobs = await getJobs();
 
   // 2. Parse Search Params
   const params = await searchParams;
   const search = typeof params?.search === 'string' ? params.search : "";
   const labelsParam = typeof params?.labels === 'string' ? params.labels : "";
   const hiddenReposParam = typeof params?.hiddenRepos === 'string' ? params.hiddenRepos : "";
+  const showDuplicates = params?.showDuplicates === 'true';
 
   const selectedLabels = labelsParam ? labelsParam.split(",") : [];
   const hiddenRepos = hiddenReposParam ? hiddenReposParam.split(",") : [];
 
   // 3. Filter Jobs on Server
   const filteredJobs = allJobs.filter(job => {
-    // Repo Visibility Filter
+    // 1. Duplicate Filter (Primary)
+    // If we don't want to show duplicates, filter out any job that has duplicateInfo
+    if (!showDuplicates && job.duplicateInfo) return false;
+
+    // 2. Repo Visibility Filter
     if (hiddenRepos.includes(job.repository)) return false;
 
     // Default to true
@@ -57,21 +62,22 @@ export default async function JobsPage({ searchParams }: PageProps) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="px-6 py-4 border-b flex items-center gap-4 bg-background/80 backdrop-blur-md z-50 sticky top-0">
+      <header className="px-3 sm:px-6 py-3 sm:py-4 border-b flex items-center gap-3 sm:gap-4 bg-background/80 backdrop-blur-md z-50 sticky top-0">
         <LinkNext href="/" className="text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
         </LinkNext>
-        <h1 className="text-xl font-bold">Latest Jobs</h1>
+        <h1 className="text-lg sm:text-xl font-bold">Latest Jobs</h1>
       </header>
       
-      <main className="flex-1 container mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 container mx-auto px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
           <JobList 
             jobs={filteredJobs} 
             allJobs={allJobs}
             initialFilters={{
               search,
               labels: selectedLabels,
-              hiddenRepos
+              hiddenRepos,
+              showDuplicates
             }}
           />
       </main>

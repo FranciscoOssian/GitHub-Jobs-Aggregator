@@ -28,4 +28,9 @@ export interface Job {
     color: string;
   }[];
   createdAt: string;
+  duplicateInfo?: {
+    score: number;
+    originalTitle: string;
+    originalId: string;
+  };
 }

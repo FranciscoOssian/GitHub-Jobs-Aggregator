@@ -13,6 +13,7 @@ interface FilterState {
   search: string;
   labels: string[];
   hiddenRepos: string[];
+  showDuplicates: boolean;
 }
 
 interface JobListProps {
@@ -62,6 +63,7 @@ export function JobList({ jobs, allJobs, initialFilters }: JobListProps) {
     if (next.search) params.set("search", next.search);
     if (next.labels.length > 0) params.set("labels", next.labels.join(","));
     if (next.hiddenRepos.length > 0) params.set("hiddenRepos", next.hiddenRepos.join(","));
+    if (next.showDuplicates) params.set("showDuplicates", "true");
 
     router.replace(`?${params.toString()}`, { scroll: false });
   };
@@ -109,13 +111,13 @@ export function JobList({ jobs, allJobs, initialFilters }: JobListProps) {
     updateFilters({ hiddenRepos: next });
   };
   
-  const clearAll = () => updateFilters({ search: "", labels: [], hiddenRepos: [] });
+  const clearAll = () => updateFilters({ search: "", labels: [], hiddenRepos: [], showDuplicates: false });
 
   const FilterContent = (
-    <div className="bg-card border rounded-xl p-5 shadow-sm space-y-6 lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto customize-scrollbar">
+    <div className="bg-card border rounded-xl p-4 sm:p-5 shadow-sm space-y-4 sm:space-y-6 lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto customize-scrollbar">
        <div className="flex items-center justify-between">
-          <h2 className="font-semibold flex items-center gap-2">
-            <Filter className="w-4 h-4" /> Filters
+          <h2 className="text-sm sm:text-base font-semibold flex items-center gap-2">
+            <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Filters
           </h2>
           {(filters.search || filters.labels.length > 0 || filters.hiddenRepos.length > 0) && (
             <button
@@ -142,6 +144,30 @@ export function JobList({ jobs, allJobs, initialFilters }: JobListProps) {
               aria-label="Search jobs by title or company"
             />
          </div>
+       </div>
+
+       {/* Show Duplicates Switch */}
+       <div className="flex items-center justify-between py-2 border-y border-border/40">
+          <div className="space-y-0.5">
+            <label htmlFor="show-duplicates" className="text-sm font-medium">Show Duplicates</label>
+            <p className="text-[10px] text-muted-foreground">Show similar jobs from other repos</p>
+          </div>
+          <button
+            id="show-duplicates"
+            type="button"
+            onClick={() => updateFilters({ showDuplicates: !filters.showDuplicates })}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+              filters.showDuplicates ? "bg-primary" : "bg-input"
+            }`}
+            role="switch"
+            aria-checked={filters.showDuplicates}
+          >
+            <span
+              className={`pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform ${
+                filters.showDuplicates ? "translate-x-4" : "translate-x-0.5"
+              }`}
+            />
+          </button>
        </div>
 
        {/* Repositories */}
@@ -229,20 +255,20 @@ export function JobList({ jobs, allJobs, initialFilters }: JobListProps) {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 relative items-start">
+    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 relative items-start">
       
       {/* Mobile Filter Toggle */}
-      <div className="lg:hidden w-full sticky top-[64px] z-30 mb-4 bg-background/95 backdrop-blur-sm">
+      <div className="lg:hidden w-full sticky top-[52px] sm:top-[60px] z-30 mb-3 sm:mb-4 bg-background/95 backdrop-blur-sm pb-2">
          <button 
             onClick={() => setShowMobileFilters(!showMobileFilters)}
-            className="w-full flex items-center justify-between p-4 bg-background border rounded-xl shadow-sm font-semibold cursor-pointer"
+            className="w-full flex items-center justify-between p-3 sm:p-4 bg-background border rounded-xl shadow-sm font-semibold cursor-pointer hover:bg-accent/50 transition-colors"
             aria-expanded={showMobileFilters}
             aria-controls="mobile-filters-sidebar"
          >
-            <span className="flex items-center gap-2">
-              <Filter className="w-5 h-5" /> Filters
+            <span className="flex items-center gap-2 text-sm sm:text-base">
+              <Filter className="w-4 h-4 sm:w-5 sm:h-5" /> Filters
             </span>
-            {showMobileFilters ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {showMobileFilters ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Menu className="w-4 h-4 sm:w-5 sm:h-5" />}
          </button>
       </div>
 
@@ -270,9 +296,9 @@ export function JobList({ jobs, allJobs, initialFilters }: JobListProps) {
 
       {/* Main Content */}
       <main className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold tracking-tight">Job Listings</h1>
-          <Badge className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-3 py-1 text-sm">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 gap-3">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Job Listings</h1>
+          <Badge className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-2.5 sm:px-3 py-1 text-xs sm:text-sm shrink-0">
              {jobs.length} Found
           </Badge>
         </div>

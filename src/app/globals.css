@@ -32,6 +32,9 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+  
+  /* Custom breakpoint for extra small screens */
+  --breakpoint-xs: 475px;
 }
 
 :root {
@@ -162,3 +165,21 @@ body {
   background-color: var(--primary);
 }
 
+/* Custom utility for better word breaking */
+.wrap-break-word {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* Custom xs breakpoint utilities */
+@media (min-width: 475px) {
+  .xs\:inline {
+    display: inline;
+  }
+  
+  .xs\:hidden {
+    display: none;
+  }
+}

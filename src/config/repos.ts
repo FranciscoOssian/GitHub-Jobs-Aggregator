@@ -17,4 +17,8 @@ export const REPOSITORIES: Repository[] = [
   { owner: 'datascience-br', name: 'vagas' },
   { owner: 'remotejobsbr', name: 'design-ux-vagas' },
   { owner: 'brasil-php', name: 'vagas' },
+  { owner: 'androiddevbr', name: 'vagas' },
+  { owner: 'backend-pt', name: 'vagas' },
+  { owner: 'CangaceirosDevels', name: 'vagas_de_emprego' },
+  { owner: 'CocoaHeadsBrasil', name: 'vagas' },
 ];

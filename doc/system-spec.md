@@ -11,11 +11,12 @@ It:
 ---
 
 ## 2. Technology Stack
-- Framework: **Next.js**
+- Framework: **Next.js (App Router + Server Components)**
 - Styling: **Tailwind CSS**
 - Data source: **GitHub GraphQL API**
 - Authentication: Personal GitHub token (read-only)
 - Rendering: Static + ISR (Jobs data) / Server-Side Rendering (Filtering)
+- Caching: **`unstable_cache`** for aggregated job data with revalidation tags.
 
 ---
 
@@ -55,33 +56,31 @@ If a repository uses unconventional labels, they remain unchanged.
 
 ---
 
-## 6. Normalization Rules
-Allowed:
-- Visual normalization of labels for UI
-- Deduplication
-- Sorting
+### 6. Normalization & Deduplication
+- **Visual normalization**: Labels are cleaned up for UI display (e.g., casing).
+- **Similarity-based Deduplication**: 
+  - Uses **TF-IDF with 8-character n-grams** to compare job titles.
+  - Default similarity threshold: **0.85**.
+  - Duplicate jobs are identified but preserved in the dataset with a `duplicateInfo` property.
+  - By default, duplicates are filtered out in the UI unless explicitly enabled.
+- **Sorting**: Jobs are typically sorted by their arrival from the API (latest first).
 
-Not allowed:
+#### Not allowed:
 - Semantic inference
 - Taxonomy creation
 - Content rewriting
 
 ---
 
-## 7. Filtering
-- Filtering is **Server-Side** (controlled via URL query parameters)
-- Filters operate directly on existing labels
-- **Layout**: 
-  - **Desktop**: Persistent Sticky Sidebar for filters to allow simultaneous filtering and browsing.
-  - **Mobile**: Collapsible or stacked filters at the top.
+- **Search**: Jobs can be filtered by `Title`, `Repository`, and `Company`. Search is case-insensitive.
 - **Repository Filtering**: Users can select/deselect specific repositories (default: all selected).
   - **Display**: Shown as the community/owner name only (e.g., "backend-br" instead of "backend-br/vagas").
-  - **Sorting**: Repositories are sorted by name length (ascending) to optimize the visual flow of the filter buttons.
+  - **Sorting**: Repositories are sorted by community name length (ascending) to optimize the visual flow.
 - **Label Logic**: Multiple selected labels use **OR** logic (Union), not AND. This allows selecting labels from different repositories simultaneously.
-- **Dynamic Label Availability**: The list of available filter labels must be derived **only** from the currently visible jobs.
-- **Label Context**: Labels must be visually associated with their repository (e.g., grouped by repository in the filter UI).
-- **Styling**: Label buttons should have accessible contrast and distinct visual style.
-- No derived or synthetic filters
+- **Duplicate Toggle**: A "Show Duplicates" switch allows users to see similar job postings from different repositories.
+- **Dynamic Label Availability**: The list of available filter labels is derived from the currently visible jobs.
+- **Label Context**: Labels are visually grouped by their repository in the filter UI.
+- **Styling**: Label buttons use accessible contrast and distinct visual styles for selected states.
 
 ### Persistence Strategy
 Filters (text, labels, repositories) are persisted **exclusively** via:

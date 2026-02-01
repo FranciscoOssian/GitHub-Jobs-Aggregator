@@ -104,7 +104,7 @@ Meaning is never inferred or unified.
 - Fast scanning
 - Technical aesthetic
 - **Accessibility**: First-class citizen. Must aim for WCAG AA compliance (Contrast, Semantic HTML, Keyboard Navigation).
-- No content duplication
+- No content duplication: **Smart deduplication** reduces noise while giving users the option to see similar posts.
 - Encourage redirection to GitHub
 
 ---

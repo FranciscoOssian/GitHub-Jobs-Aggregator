@@ -9,6 +9,7 @@ A **non-commercial informational website** that aggregates job postings publishe
 -   **Centralized Discovery**: Aggregates job postings from multiple GitHub repositories into a single, high-quality index.
 -   **Direct GitHub Integration**: All job listings link directly to the original GitHub Issue. No local job descriptions are stored or hosted.
 -   **Smart Filtering**: Filter jobs by Repository or Labels with support for multiple selections (OR logic).
+-   **Smart Deduplication**: Automatically identifies similar job postings across different repositories to reduce noise.
 -   **Data Ownership**: Respects the source of the data; users are always redirected to the repository to apply or view details.
 -   **Modern UI**: Clean, minimal interface built with Next.js and Tailwind CSS.
 -   **Theme Support**: Fully supports Light and Dark modes.
@@ -24,7 +25,8 @@ This project is built using:
 
 ### Data Strategy
 -   Issues are fetched via the GitHub GraphQL API from a predefined list of repositories.
--   Valid jobs are cached and revalidated daily (ISR).
+-   Valid jobs are processed for duplicates using similarity detection (TF-IDF) during the caching phase.
+-   Jobs are cached and revalidated daily (ISR) using `unstable_cache`.
 -   Failures in one repository do not block the entire site.
 
 ## Getting Started
