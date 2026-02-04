@@ -18,8 +18,8 @@ interface PageProps {
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
-function getBaseUrl() {
-  const headersList = headers();
+async function getBaseUrl() {
+  const headersList = await headers();
   const host = headersList.get("x-forwarded-host") ?? headersList.get("host");
   const protocol = headersList.get("x-forwarded-proto") ?? "http";
 
@@ -32,7 +32,7 @@ function getBaseUrl() {
 
 export default async function JobsPage({ searchParams }: PageProps) {
   // 1. Fetch all data from the API with cache support
-  const response = await fetch(`${getBaseUrl()}/api/jobs`, {
+  const response = await fetch(`${await getBaseUrl()}/api/jobs`, {
     next: {
       revalidate: 86400,
       tags: ["jobs"],
