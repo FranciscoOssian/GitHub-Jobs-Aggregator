@@ -1,7 +1,8 @@
-import { getJobs } from "@/lib/jobs-service";
 import { JobList } from "./job-list";
 import LinkNext from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { headers } from "next/headers";
+import type { Job } from "@/types/job";
 
 import type { Metadata } from "next";
 
@@ -17,9 +18,31 @@ interface PageProps {
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
+function getBaseUrl() {
+  const headersList = headers();
+  const host = headersList.get("x-forwarded-host") ?? headersList.get("host");
+  const protocol = headersList.get("x-forwarded-proto") ?? "http";
+
+  if (!host) {
+    return "http://localhost:3000";
+  }
+
+  return `${protocol}://${host}`;
+}
+
 export default async function JobsPage({ searchParams }: PageProps) {
-  // 1. Fetch all data on the server with similarity check
-  const allJobs = await getJobs();
+  // 1. Fetch all data from the API with cache support
+  const response = await fetch(`${getBaseUrl()}/api/jobs`, {
+    next: {
+      revalidate: 86400,
+      tags: ["jobs"],
+    },
+  });
+  if (!response.ok) {
+    console.error(`Failed to fetch jobs API: ${response.status}`);
+  }
+
+  const allJobs: Job[] = response.ok ? await response.json() : [];
 
   // 2. Parse Search Params
   const params = await searchParams;
